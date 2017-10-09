@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:int-file="http://www.springframework.org/schema/integration/file"
+	xmlns:int="http://www.springframework.org/schema/integration"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/integration/file http://www.springframework.org/schema/integration/file/spring-integration-file-4.3.xsd
+		http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration-4.3.xsd">
+	
+	<context:annotation-config />
+	<context:component-scan base-package="com.json.service" />
+
+	<int-file:inbound-channel-adapter 
+    	id="filesIn" auto-startup="true"
+		directory="D:\\Balram_Kushwah\\MyDrive\\inputfiles"  
+		filter="jSonFileFilter">
+    	<int:poller id="filePoller" fixed-delay="500"/>
+	</int-file:inbound-channel-adapter>
+	
+	
+	<bean id="jSonFileFilter"  p:filenamePattern="*.json" class="org.springframework.integration.file.config.FileListFilterFactoryBean"/>
+
+	<int:splitter input-channel="filesIn" output-channel="splittedMsgChannel" auto-startup="true" ref="fileSplitter" />
+
+	<int:channel id="splittedMsgChannel"/>
+	
+	<bean id= "fileSplitter" class="org.springframework.integration.file.splitter.FileSplitter"/>
+
+	<int:service-activator input-channel="splittedMsgChannel" ref="splittedMsgService" />
+</beans>
